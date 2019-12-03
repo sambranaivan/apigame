@@ -1,0 +1,302 @@
+console.log("Begin")
+function randomIntFromInterval(min, max) { // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+// Create one dimensional array
+var turn = 1;
+var round = 1;
+report = [];
+var EFECTIVIDAD = new Array(18);
+// Loop to create 2D array using 1D array
+for (var i = 0; i < EFECTIVIDAD.length; i++) {
+    EFECTIVIDAD[i] = new Array(18);
+}
+// Loop to initilize 2D array elements.
+for (var i = 0; i < 18; i++) {
+    for (var j = 0; j < 18; j++) {
+        EFECTIVIDAD[i][j] = 1;
+    }
+}
+
+
+
+
+var TYPE = {
+    ACERO: 0,
+    AGUA: 1,
+    BICHO: 2,
+    DRAGON: 3,
+    ELECTRICO: 4,
+    FANTASMA: 5,
+    FUEGO: 6,
+    HADA: 7,
+    HIELO: 8,
+    LUCHA: 9,
+    NORMAL: 10,
+    PLANTA: 11,
+    PSIQUICO: 12,
+    ROCA: 13,
+    OSCURO: 14,
+    TIERRA: 15,
+    VENENO: 16,
+    VOLADOR: 17
+}
+
+EFECTIVIDAD[TYPE.ACERO][TYPE.ACERO] = 0.5
+EFECTIVIDAD[TYPE.ACERO][TYPE.AGUA] = 0.5
+EFECTIVIDAD[TYPE.ACERO][TYPE.ELECTRICO] = 0.5
+EFECTIVIDAD[TYPE.ACERO][TYPE.FUEGO] = 0.5
+EFECTIVIDAD[TYPE.ACERO][TYPE.HADA] = 2
+EFECTIVIDAD[TYPE.ACERO][TYPE.HIELO] = 2
+EFECTIVIDAD[TYPE.ACERO][TYPE.ROCA] = 2
+//
+EFECTIVIDAD[TYPE.AGUA][TYPE.AGUA] = 0.5
+EFECTIVIDAD[TYPE.AGUA][TYPE.DRAGON] = 0.5
+EFECTIVIDAD[TYPE.AGUA][TYPE.PLANTA] = 0.5
+EFECTIVIDAD[TYPE.AGUA][TYPE.FUEGO] = 2
+EFECTIVIDAD[TYPE.AGUA][TYPE.ROCA] = 2
+EFECTIVIDAD[TYPE.AGUA][TYPE.TIERRA] = 2
+//
+EFECTIVIDAD[TYPE.BICHO][TYPE.ACERO] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.FANTASMA] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.FUEGO] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.HADA] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.LUCHA] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.VENENO] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.VOLADOR] = 0.5
+EFECTIVIDAD[TYPE.BICHO][TYPE.PLANTA] = 2
+EFECTIVIDAD[TYPE.BICHO][TYPE.PSIQUICO] = 2
+EFECTIVIDAD[TYPE.BICHO][TYPE.OSCURO] = 2
+//
+EFECTIVIDAD[TYPE.DRAGON][TYPE.ACERO] = 0.5
+EFECTIVIDAD[TYPE.DRAGON][TYPE.DRAGON] = 2
+EFECTIVIDAD[TYPE.DRAGON][TYPE.HADA] = 0
+//
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.AGUA] = 2
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.VOLADOR] = 2
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.DRAGON] = 0.5
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.ELECTRICO] = 0.5
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.PLANTA] = 0.5
+EFECTIVIDAD[TYPE.ELECTRICO][TYPE.TIERRA] = 0
+//
+EFECTIVIDAD[TYPE.FANTASMA][TYPE.FANTASMA] = 2
+EFECTIVIDAD[TYPE.FANTASMA][TYPE.NORMAL] = 0
+EFECTIVIDAD[TYPE.FANTASMA][TYPE.PSIQUICO] = 2
+EFECTIVIDAD[TYPE.FANTASMA][TYPE.OSCURO] = 0.5
+//
+EFECTIVIDAD[TYPE.FUEGO][TYPE.ACERO] = 2
+EFECTIVIDAD[TYPE.FUEGO][TYPE.AGUA] = 0.5
+EFECTIVIDAD[TYPE.FUEGO][TYPE.BICHO] = 2
+EFECTIVIDAD[TYPE.FUEGO][TYPE.DRAGON] = 0.5
+EFECTIVIDAD[TYPE.FUEGO][TYPE.FUEGO] = 0.5
+EFECTIVIDAD[TYPE.FUEGO][TYPE.ROCA] = 0.5
+EFECTIVIDAD[TYPE.FUEGO][TYPE.HIELO] = 2
+EFECTIVIDAD[TYPE.FUEGO][TYPE.PLANTA] = 2
+//
+EFECTIVIDAD[TYPE.HADA][TYPE.ACERO] = 0.5
+EFECTIVIDAD[TYPE.HADA][TYPE.DRAGON] = 2
+EFECTIVIDAD[TYPE.HADA][TYPE.FUEGO] = 0.5
+EFECTIVIDAD[TYPE.HADA][TYPE.LUCHA] = 2
+EFECTIVIDAD[TYPE.HADA][TYPE.OSCURO] = 2
+EFECTIVIDAD[TYPE.HADA][TYPE.VENENO] = 0.5
+//
+
+
+
+function Player(name) {
+    this.team = [];
+    this.name = name;
+    this.isAlive = function(){
+
+        var status = false
+        this.team.forEach(e=>{
+            if(e.hp > 0)
+            {
+                status = true;
+            }
+        })
+        return status
+    }
+    this.status = function(){
+
+        var alive=  this.team.filter(x=>x.hp > 0).length;
+        // console.log(this.name+"("+alive+"/"+this.team.length+")")
+
+    }
+
+    this.enemy;
+}
+
+function Monster(index, atk, def, hpMax, speed, attackType, defenseType, name, owner, level) {
+    this.owner = owner
+    this.speed = speed
+    this.atk = atk
+    this.def = def
+    this.hpMax = Math.ceil(hpMax*(level/10));
+    this.hp = Math.ceil(hpMax*(level/10));
+    this.attackType = attackType
+    this.defenseType = defenseType
+    this.level = level
+    this.name = name
+    this.index = index
+
+    //
+    this.attack = function()
+    {
+        /**select target */
+
+
+        target = this.owner.enemy.team.reduce((prev, current) => (prev.hp > current.hp) ? prev : current)
+        target.onTarget(this);//trigger on target Effect
+        if(target.hp > 0)
+        {
+            // console.log("\t" + "(" + this.owner.name + ")" + this.name + " attacks " + "(" + target.owner.name + ")" + target.name + " hp:" + target.hp);
+
+            //damage step
+            type_bonus = (EFECTIVIDAD[this.attackType][target.defenseType]);
+            // console.log(this.attackType+" "+target.defenseType)
+            // console.log
+            variacion = randomIntFromInterval(85, 100);
+            dmg = 0.01 * 1 * type_bonus * variacion * ((0.2 * this.level + 1) * this.atk * 100 / (25 * target.def))
+            dmg = Math.ceil(dmg)
+            if (dmg < 0) { dmg = 1 }
+            target.getDamage(dmg)
+            report.push({
+                class:"battle",
+                turn:turn,
+                round:round,
+                atacante:this.index,
+                defensor:target.index,
+                withType:this.attackType,
+                dmg:dmg,
+                hpleft:target.hp
+
+            })
+        }
+        else
+        {
+            // ya esta muerto
+        }
+
+    }
+    this.onTarget = function()
+    {
+        //TODO
+    }
+    this.getDamage = function(dmg)
+    {
+        this.hp -= dmg;
+        if(this.hp <= 0)
+        {
+         this.hp = 0;
+        //  console.log("\t\t"+this.name+" defeated")
+
+        }
+        // console.log("hp left: "+this.hp)
+    }
+}
+
+
+
+
+
+function Battle(player,enemy)
+{
+
+    this.resume = []
+    this.monsters = [];
+    this.player = player;
+    this.enemy = enemy;
+    this.battleStart = function()
+    {
+        this.player.team.forEach(e => {
+            this.monsters.push(e)
+        });
+        this.enemy.team.forEach(e => {
+            this.monsters.push(e)
+        });
+
+        this.standByPhase();
+
+    }
+    this.standByPhase=function ()
+    {
+        this.monsters.sort((a, b) => (a.speed < b.speed) ? 1 : -1)
+
+        // console.log("Turn: "+this.turn)
+        this.player.status();
+        this.enemy.status();
+        this.battlePhase();
+    }
+
+    this.battlePhase = function()
+    {
+        round = 0;
+        this.monsters.forEach(e=>{
+            continuar = true
+            if(e.hp > 0)//esta vivo?
+            {
+                if(e.owner.enemy.isAlive)
+                    {
+                        round++
+                        // console.log("Ronda: "+this.round)
+                        e.attack();
+
+                    }
+            }
+
+
+
+
+        })
+        if (this.player.isAlive() && this.enemy.isAlive()) {
+            turn++;
+            this.standByPhase();
+        }
+        else if (this.player.isAlive()) {
+            console.log(this.player.name + " WIN")
+            report.push({
+                class:"end",winner:"player"
+
+            })
+            console.log(report)
+        }
+        else if (this.enemy.isAlive()) {
+            console.log(this.enemy.name + "WIN")
+            report.push({
+                class:"end",winner:"enemy"
+
+            })
+            console.log(report)
+        }
+
+    }
+};
+
+var player = new Player("Jugador 1")
+var enemy = new Player("Enemigo")
+player.enemy = enemy;
+enemy.enemy = player;
+
+
+this.player.team.push(new Monster("1_1", 32, 32, 45, 46, TYPE.ELECTRICO, TYPE.ELECTRICO, "Pichu", player, 24))
+this.player.team.push(new Monster("1_2", 49, 49, 45, 45, TYPE.ELECTRICO, TYPE.ELECTRICO, "Pikachu", player, 25))
+this.player.team.push(new Monster("1_3", 69, 69, 65, 35, TYPE.ELECTRICO, TYPE.ELECTRICO, "Raichu", player, 26))
+this.player.team.push(new Monster("1_4", 49, 49, 45, 45, TYPE.NORMAL, TYPE.NORMAL, "Zigzagoon", player, 25))
+this.player.team.push(new Monster("1_5", 79, 79, 45, 50, TYPE.FUEGO, TYPE.FUEGO, "Charizard", player, 25))
+this.player.team.push(new Monster("1_6", 49, 49, 45, 60, TYPE.NORMAL, TYPE.NORMAL, "Eevee", player, 25))
+
+
+
+this.enemy.team.push(new Monster("2_1", 49, 49, 45, 45, TYPE.BICHO, TYPE.BICHO, "Parasect", enemy, 25))
+this.enemy.team.push(new Monster("2_2", 69, 69, 65, 35, TYPE.FANTASMA, TYPE.FANTASMA, "Dusklops", enemy, 25))
+this.enemy.team.push(new Monster("2_3", 49, 49, 45, 45, TYPE.VENENO, TYPE.VENENO, "Muk", enemy, 25))
+this.enemy.team.push(new Monster("2_4", 79, 79, 45, 50, TYPE.VENENO, TYPE.VENENO, "Grimer", enemy, 25))
+this.enemy.team.push(new Monster("2_5", 49, 49, 45, 60, TYPE.NORMAL, TYPE.NORMAL, "Eevee", enemy, 25))
+this.enemy.team.push(new Monster("2_6", 32, 32, 45, 100, TYPE.VENENO, TYPE.VENENO, "Arbok", enemy, 24))
+
+
+battle = new Battle(player,enemy);
+
+battle.battleStart();
+
