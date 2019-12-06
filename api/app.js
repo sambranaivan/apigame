@@ -8,7 +8,7 @@ let _battle = require("./battle")
 
 
 app.get('/',cors(),function(req,res){
-    console.log("Begin")
+   
 
     var player = new _player.Player("Jugador 1")
     var enemy = new _player.Player("Enemigo")

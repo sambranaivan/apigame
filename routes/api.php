@@ -18,3 +18,5 @@ use Illuminate\Http\Request;
 // });
 
 Route::get('test','PokemonController@test');
+Route::get('team','PokemonController@getTeam');
+Route::get('user','PokemonController@getUser');
