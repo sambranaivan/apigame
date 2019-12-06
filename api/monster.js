@@ -3,7 +3,10 @@ var EFECTIVIDAD = _type.EFECTIVIDAD
 var TYPE = _type.TYPE
 var E_TYPE = _type.eng_type
 var _pokedex = require('./pokedex');
-var pokedex = _pokedex.pokedex
+var pokedex = _pokedex.pokedex;
+
+
+especiales = [E_TYPE.AGUA,E_TYPE.DRAGON,E_TYPE.ELECTRICO,E_TYPE.FUEGO,E_TYPE.HIELO,E_TYPE.PLANTA,E_TYPE.PSIQUICO,E_TYPE.SINIESTRO,E_TYPE.HADA]
 
 function randomIntFromInterval(min, max) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -14,14 +17,26 @@ function Monster(owner,index,name,level) {
     
     this.battle = null;
     this.owner = owner
-    this.speed = data.baseStats.spd;
-    this.atk = data.baseStats.atk
-    this.def = data.baseStats.def
+    this.speed = data.baseStats.spe;
+    
+    
     this.level = level
     this.hpMax = Math.ceil(data.baseStats.hp * (level / 10));
     this.hp = Math.ceil(data.baseStats.hp * (level / 10));
     this.attackType = E_TYPE[data.types[0]];
     this.defenseType = E_TYPE[data.types[0]];
+    if(especiales.indexOf(this.attackType))
+    {
+        this.atk = data.baseStats.spa
+        this.def = data.baseStats.spd
+        this.class = "especial"
+    }
+    else
+    {
+        this.atk = data.baseStats.atk
+        this.def = data.baseStats.def
+        this.class = "fisico"
+    }
     this.name = name
     this.index = index
     this.sprite = data.num
@@ -41,7 +56,8 @@ function Monster(owner,index,name,level) {
             name: this.name,
             index: this.index,
             sprite:this.sprite,
-            status:this.status
+            status:this.status,
+            class:this.class
     }}
 
     //
@@ -59,7 +75,7 @@ function Monster(owner,index,name,level) {
             // console.log(this.attackType+" "+target.defenseType)
             // console.log
             variacion = randomIntFromInterval(85, 100);
-            dmg = 0.01 * 1 * type_bonus * variacion * ((0.2 * this.level + 1) * this.atk * 100 / (25 * target.def))
+            dmg = 0.01 * 5 * type_bonus * variacion * ((0.2 * this.level + 1) * this.atk * 100 / (25 * target.def))
             dmg = Math.ceil(dmg)
             if (dmg < 0) { dmg = 1 }
             target.getDamage(dmg)
